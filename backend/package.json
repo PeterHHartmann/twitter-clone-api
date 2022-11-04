@@ -11,7 +11,8 @@
     "dev": "concurrently --names \"server,eslint,swagger\" \"nodemon\" \"nodemon --exec npm run eslint\" \"nodemon -x tsoa spec\"",
     "prettierw": "prettier src/**/*.ts --write",
     "eslint": "eslint **/*.ts",
-    "swagger": "tsoa spec"
+    "swagger": "tsoa spec",
+    "prisma-pull": "npx prisma db pull"
   },
   "author": "Peter Helle Hartmann",
   "license": "MIT",
