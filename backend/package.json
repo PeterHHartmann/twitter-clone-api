@@ -1,0 +1,39 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "description": "backend server for twitter-clone",
+  "main": "build/app.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node build/app.js",
+    "start-dev": "ts-node --esm src/app.ts",
+    "prettierw": "prettier src/**/*.ts --write",
+    "eslint": "eslint **/*.ts"
+  },
+  "author": "Peter Helle Hartmann",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/morgan": "^1.9.3",
+    "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "concurrently": "^7.5.0",
+    "eslint": "^8.26.0",
+    "nodemon": "^2.0.20",
+    "onchange": "^7.1.0",
+    "prettier": "2.7.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  },
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ext": "ts",
+    "exec": "concurrently --names \"server,eslint\" \"npm run start-dev\" \"npm run eslint\""
+  }
+}
