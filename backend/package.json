@@ -4,12 +4,15 @@
   "description": "backend server for twitter-clone",
   "main": "build/app.js",
   "scripts": {
+    "predev": "npm run swagger",
+    "prebuild": "npm run swagger",
     "dev": "nodemon",
     "build": "tsc",
     "start": "node build/app.js",
     "start-dev": "ts-node --esm src/app.ts",
     "prettierw": "prettier src/**/*.ts --write",
-    "eslint": "eslint **/*.ts"
+    "eslint": "eslint **/*.ts",
+    "swagger": "tsoa spec"
   },
   "author": "Peter Helle Hartmann",
   "license": "MIT",
