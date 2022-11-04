@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+#------------------- not auto-generated --------------------#
+# Backend build files
+backend/build
