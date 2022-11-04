@@ -106,3 +106,5 @@ dist
 #------------------- not auto-generated --------------------#
 # Backend build files
 backend/build
+
+backend/public
