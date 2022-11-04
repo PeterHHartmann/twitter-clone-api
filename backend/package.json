@@ -4,12 +4,11 @@
   "description": "backend server for twitter-clone",
   "main": "build/app.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
-    "dev": "nodemon",
-    "build": "tsc",
-    "start": "node build/app.js",
-    "start-dev": "ts-node --esm src/app.ts",
+    "dev": "concurrently --names \"server,eslint,swagger\" \"nodemon\" \"nodemon --exec npm run eslint\" \"nodemon -x tsoa spec\"",
     "prettierw": "prettier src/**/*.ts --write",
     "eslint": "eslint **/*.ts",
     "swagger": "tsoa spec"
@@ -42,6 +41,6 @@
       "src"
     ],
     "ext": "ts",
-    "exec": "concurrently --names \"server,eslint\" \"npm run start-dev\" \"npm run eslint\""
+    "exec": "ts-node --esm src/app.ts"
   }
 }
