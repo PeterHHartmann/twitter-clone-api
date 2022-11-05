@@ -28,6 +28,8 @@
     "@typescript-eslint/parser": "^5.42.0",
     "concurrently": "^7.5.0",
     "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
     "nodemon": "^2.0.20",
     "onchange": "^7.1.0",
     "prettier": "2.7.1",

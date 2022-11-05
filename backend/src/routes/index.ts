@@ -1,7 +1,7 @@
-import express from 'express'
-import AccountRouter from './account'
+import express from 'express';
+import AccountRouter from './account';
 
-const router = express.Router()
-router.use('/', AccountRouter)
+const router = express.Router();
+router.use('/', AccountRouter);
 
-export default router
+export default router;
