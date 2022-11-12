@@ -8,12 +8,12 @@ datasource db {
 }
 
 model account {
-  id         Int       @id @default(autoincrement())
-  username   String    @unique @db.VarChar(50)
-  email      String    @unique @db.VarChar(50)
-  password   String    @unique @db.VarChar(50)
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  profile    profile[]
+  id         Int      @id @default(autoincrement())
+  username   String   @unique @db.VarChar(50)
+  email      String   @unique @db.VarChar(50)
+  password   String   @unique @db.VarChar(60)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  profile    profile?
 }
 
 model avatar {
@@ -50,10 +50,11 @@ model following {
 
 model profile {
   id                                     Int         @id @default(autoincrement())
-  username                               String      @db.VarChar(50)
+  username                               String      @unique(map: "username_unique") @db.VarChar(50)
   bio                                    String?
   created_at                             DateTime    @default(now()) @db.Timestamp(6)
   last_modified                          DateTime    @default(now()) @db.Timestamp(6)
+  displayname                            String      @db.VarChar(50)
   account                                account     @relation(fields: [username], references: [username], onDelete: Cascade, map: "profile_username_account_username_fkey")
   avatar                                 avatar[]
   banner                                 banner[]

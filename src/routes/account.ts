@@ -7,6 +7,9 @@ const router = Router();
 router.get(`/account/:email`, async (req, res) => {
   const result = await prisma.account.findUnique({
     where: { email: req.params.email },
+    include: {
+      profile: true
+    }
   });
   res.json(result);
 });
