@@ -6,7 +6,7 @@ const saltRounds = 10;
 const prisma = new PrismaClient();
 const router = Router();
 
-router.post(`/login`, async (req, res) => {
+router.post(`/signin`, async (req, res) => {
   if (req.body) {
     try {
       const account: account | null = await prisma.account.findUnique({
@@ -19,7 +19,7 @@ router.post(`/login`, async (req, res) => {
             const profile: profile | null = await prisma.profile.findUnique({
               where: { username: account.username },
             });
-            const user = {
+            const user: object = {
               username: account.username,
               displayname: profile?.displayname,
             };
@@ -40,6 +40,8 @@ router.post(`/login`, async (req, res) => {
 
 router.post('/signup', async (req, res) => {
   const body = req.body;
+  console.log(body);
+  
   if (body) {
     //do validation here (code 422 Unprocessable Entity)
     const email: string = body.email;
@@ -51,7 +53,7 @@ router.post('/signup', async (req, res) => {
         data: {
           email: email,
           username: username,
-          password: hash,
+          password: hash, 
         },
       });
       await prisma.profile.create({
@@ -60,16 +62,15 @@ router.post('/signup', async (req, res) => {
           displayname: account.username
         }
       })
-      res.sendStatus(201)
+      return res.sendStatus(201)
     } catch(e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
-          res.statusCode = 403;
           const target = e.meta?.target as Array<string>
           if(target && target[0] === 'email') {
-            return res.json({ msg: 'Email is already taken' }).sendStatus(409);
+            return res.status(409).json({ msg: 'Email is already taken' });
           } else if (target && target[0] === 'username') {
-            return res.json({ msg: 'Username is already taken' }).sendStatus(409);
+            return res.status(409).json({ msg: 'Username is already taken' });
           }
         }
       }
