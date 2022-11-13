@@ -67,10 +67,8 @@ router.post('/signup', async (req, res) => {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
           const target = e.meta?.target as Array<string>
-          if(target && target[0] === 'email') {
-            return res.status(409).json({ msg: 'Email is already taken' });
-          } else if (target && target[0] === 'username') {
-            return res.status(409).json({ msg: 'Username is already taken' });
+          if(target && target[0]) {
+            return res.status(409).json({ field: target[0] });
           }
         }
       }
