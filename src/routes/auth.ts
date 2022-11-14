@@ -8,12 +8,10 @@ const router = Router();
 
 router.post(`/signin`, async (req, res) => {
   if (req.body) {
-    try {
       const account: account | null = await prisma.account.findUnique({
         where: { email: req.body.email },
       });
       if (account) {
-        try {
           const passwordMatches = await bcrypt.compare(req.body.password, account.password);
           if(passwordMatches){
             const profile: profile | null = await prisma.profile.findUnique({
@@ -26,16 +24,10 @@ router.post(`/signin`, async (req, res) => {
             const token = jwt.sign(user, process.env.TOKEN_SECRET as string, { expiresIn: '1600s' });
             return res.json({ ...user, access_token: token });
           }
-        } catch(e) {
-          console.log(e);
-        }
       }
-    } catch (e) {
-      console.log(e);
-    }
   }
   console.log('we got here');
-  return res.sendStatus(401);
+  return res.status(401).json({ error: 'error' });
 });
 
 router.post('/signup', async (req, res) => {
@@ -67,10 +59,8 @@ router.post('/signup', async (req, res) => {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
           const target = e.meta?.target as Array<string>
-          if(target && target[0] === 'email') {
-            return res.status(409).json({ msg: 'Email is already taken' });
-          } else if (target && target[0] === 'username') {
-            return res.status(409).json({ msg: 'Username is already taken' });
+          if(target && target[0]) {
+            return res.status(409).json({ field: target[0] });
           }
         }
       }
