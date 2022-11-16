@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (
-  req: any, 
-  res: any, 
+  req: Request, 
+  res: Response, 
   next: NextFunction
 ) => {
   // console.log(req);

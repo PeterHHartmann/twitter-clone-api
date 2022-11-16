@@ -1,18 +1,28 @@
-import { account, Prisma, PrismaClient, profile } from '@prisma/client';
-import { Router } from 'express';
+import prisma from '../prisma'
+import { Request, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { validateSignup } from "../middleware/validateSignup";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { account, profile } from "@prisma/client";
 const saltRounds = 10;
-const prisma = new PrismaClient();
 const router = Router();
 
-router.post(`/signin`, async (req, res) => {
-  if (req.body) {
+router.post(`/signin`, async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    console.log(body);
+    
+    if (!body || !body.email || !body.password) return res.sendStatus(422);
+    const email = body.email;
+    const password = body.password;
+
+    if(email && password) {
       const account: account | null = await prisma.account.findUnique({
-        where: { email: req.body.email },
+        where: { email: email },
       });
-      if (account) {
-          const passwordMatches = await bcrypt.compare(req.body.password, account.password);
+      if (account && account.email && account.password) {
+          const passwordMatches = await bcrypt.compare(password, account.password);
           if(passwordMatches){
             const profile: profile | null = await prisma.profile.findUnique({
               where: { username: account.username },
@@ -25,48 +35,39 @@ router.post(`/signin`, async (req, res) => {
             return res.json({ ...user, access_token: token });
           }
       }
+    }
+    return res.status(401).json({ error: 'Wrong email or password' });
+  } catch(e) {
+    return res.status(500).json({ error: 'Something went wrong please try again later' });
   }
-  console.log('we got here');
-  return res.status(401).json({ error: 'error' });
 });
 
-router.post('/signup', async (req, res) => {
-  const body = req.body;
-  console.log(body);
-  
-  if (body) {
-    //do validation here (code 422 Unprocessable Entity)
-    const email: string = body.email;
-    const username: string = body.username;
-    const password: string = body.password;
+router.post('/signup', validateSignup, async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    if (!body || !body.email || !body.username || !body.password) return res.sendStatus(422);
+    const email: string = req.body.email.toLowerCase();
+    const username: string = req.body.username.toLowerCase();
+    const password: string = req.body.password;
+
     const hash = await bcrypt.hash(password, saltRounds);
-    try {
-      const account = await prisma.account.create({
-        data: {
-          email: email,
-          username: username,
-          password: hash, 
-        },
-      });
-      await prisma.profile.create({
-        data: {
-          username: account.username,
-          displayname: account.username
-        }
-      })
-      return res.sendStatus(201)
-    } catch(e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2002') {
-          const target = e.meta?.target as Array<string>
-          if(target && target[0]) {
-            return res.status(409).json({ field: target[0] });
-          }
-        }
-      }
-    }
+    const account = await prisma.account.create({
+      data: {
+        email: email,
+        username: username,
+        password: hash,
+      },
+    });
+    await prisma.profile.create({
+      data: {
+        username: account.username,
+        displayname: account.username,
+      },
+    });
+    return res.sendStatus(201);
+  } catch(e) {
+    return res.status(500).json({ error: { target: 'all', msg: 'Something went wrong. Please try again later' } });
   }
-  return res.sendStatus(403);
 });
 
 export default router;
