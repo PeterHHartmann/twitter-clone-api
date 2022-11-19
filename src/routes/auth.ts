@@ -4,11 +4,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { validateSignup } from "../middleware/validateSignup";
 import { account, profile } from "@prisma/client";
-import { authenticateToken } from '../middleware/authenticateToken';
 const saltRounds = 10;
 const router = Router();
 
-router.post(`/signin`, async (req: Request, res: Response) => {
+router.post('/signin', async (req: Request, res: Response) => {
   try {
     const body = req.body;
     console.log(body);
@@ -27,13 +26,13 @@ router.post(`/signin`, async (req: Request, res: Response) => {
           const profile: profile | null = await prisma.profile.findUnique({
             where: { username: account.username },
           });
-          const user: object = {
+          const expires = 60 * 60 * 24 * 30;
+          const user = {
             username: account.username,
             displayname: profile?.displayname,
           };
-          const tokenExpires = 60 * 60 * 24 * 30;
-          const token = jwt.sign(user, process.env.TOKEN_SECRET as string, { expiresIn: tokenExpires });
-          return res.json({ ...user, accessToken: token, accessTokenExpires: tokenExpires });
+          const JWT = jwt.sign(user, process.env.TOKEN_SECRET as string, { expiresIn: expires });
+          return res.status(200).json({ session: JWT, expires: expires });
         }
       }
     }
@@ -71,12 +70,11 @@ router.post('/signup', validateSignup, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/session', authenticateToken, async (req: Request, res: Response) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (token == null) return res.sendStatus(401);
+router.get('/session', async (req: Request, res: Response) => {
+  const session = req.cookies.session
+  if (session == null) return res.sendStatus(401);
   try {
-    jwt.verify(token, process.env.TOKEN_SECRET as string, (err: any, user: any) => {
+    jwt.verify(session, process.env.TOKEN_SECRET as string, (err: any, user: any) => {
       if (err) return res.sendStatus(403);
       return res.status(200).json(user)
     });
