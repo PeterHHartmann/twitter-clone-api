@@ -44,11 +44,14 @@ export const validateSignup = async (req: Request, res: Response, next: NextFunc
     if (await prisma.account.findUnique({
       where: { email: username },
     })) {
+      console.log('we got here');
+      
       return res.status(409).json({ error: { target: 'username', msg: 'This username is already in use' }});
     }
     //if all checks are passed
     next();
   } catch (e) {
+    console.log(e);
     return res.status(500).json({error: {target: 'all', msg: 'Something went wrong. Please try again later'}})
   }
 }
