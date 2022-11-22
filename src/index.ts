@@ -6,14 +6,14 @@ import router from './routes';
 const PORT = process.env.PORT || 8000;
 const app: Application = express();
 
-app.use(express.json());
-app.use(morgan('tiny'));
 app.use(
   cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
   })
 );
+app.use(express.json());
+app.use(morgan('tiny'));
 
 app.use(router);
 

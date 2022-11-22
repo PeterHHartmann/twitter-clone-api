@@ -1,10 +1,11 @@
-import prisma from '../prisma'
+import prisma from '../config/prisma';
 import { Request, Response, Router } from 'express';
-import jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
+import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
-import { validateSignup } from "../middleware/validateSignup";
-import { account, profile } from "@prisma/client";
-import cookie from 'cookie'
+import { validateSignup } from '../middleware/validateSignup';
+import { account, profile } from '@prisma/client';
+import { getAccessSecret } from '../utils/constants';
 const saltRounds = 10;
 const router = Router();
 
@@ -27,27 +28,24 @@ router.post('/signin', async (req: Request, res: Response) => {
           const profile: profile | null = await prisma.profile.findUnique({
             where: { username: account.username },
           });
-          const expires = 60 * 60 * 24 * 30 ;
+          const expires = 60 * 60 * 24 * 7;
           const user = {
             username: account.username,
             displayname: profile?.displayname,
           };
-          const JWT = jwt.sign(user, process.env.TOKEN_SECRET as string, { expiresIn: expires });
-          // res.cookie('session', JWT, {
-          //   maxAge: expires,
-          //   // httpOnly: true,
-          // });
-          // console.log(Date.now());
-
-          // res.setHeader()
-          
-          // return res.sendStatus(200)
-          return res.status(200).json({ session: JWT, expires: expires });
+          const accessToken = await new SignJWT({})
+            .setProtectedHeader({ alg: 'HS256' })
+            .setJti(nanoid())
+            .setExpirationTime(Date.now() + expires)
+            .setIssuedAt()
+            .sign(new TextEncoder().encode(getAccessSecret()));
+          return res.status(200).json({ user: user, accessToken: accessToken, accessTokenExpires: expires });
         }
       }
     }
     return res.status(401).json({ error: 'Wrong email or password' });
-  } catch (e) {
+  } catch (err) {
+    console.log(err);
     return res.status(500).json({ error: 'Something went wrong please try again later' });
   }
 });
@@ -74,24 +72,10 @@ router.post('/signup', validateSignup, async (req: Request, res: Response) => {
         displayname: account.username,
       },
     });
-    return res.sendStatus(201);
-  } catch (e) {
-    console.log(e);
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.log(err);
     return res.status(500).json({ error: { target: 'all', msg: 'Something went wrong. Please try again later' } });
-  }
-});
-
-router.get('/session', async (req: Request, res: Response) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (token == null) return res.sendStatus(401);
-  try {
-    jwt.verify(token, process.env.TOKEN_SECRET as string, (err: any, user: any) => {
-      if (err) return res.sendStatus(403);
-      return res.status(200).json(user)
-    });
-  } catch(e) {
-    return res.sendStatus(500)
   }
 });
 
