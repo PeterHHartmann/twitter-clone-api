@@ -14,8 +14,8 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan('tiny'));
-
 app.use(router);
+app.use('/public', express.static('public'))
 
 app.listen(PORT, () => {
   console.log('Server is running on port', PORT);
