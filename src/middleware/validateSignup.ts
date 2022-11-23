@@ -9,7 +9,7 @@ export const validateSignup = async (req: Request, res: Response, next: NextFunc
     const body = req.body;
     if (!body || !body.email || !body.username || !body.password) return res.sendStatus(422);
     const email: string = body.email.toLowerCase();
-    const username: string = body.username.toLowerCase();
+    const username: string = body.username;
     const password: string = body.password;
     // Cheapest checks first length checking
     if (username.length > 50) {
@@ -25,32 +25,21 @@ export const validateSignup = async (req: Request, res: Response, next: NextFunc
     }
     // Cheapish checks
     if (usernameRegex.test(username) === false) {
-      return res.status(422).json({ error: { target: 'email', msg: 'Please enter a valid username' } });
+      return res.status(422).json({ error: { target: 'username', msg: 'Please enter a valid username' } });
     }
     if (emailRegex.test(email) === false) {
       return res.status(422).json({ error: { target: 'email', msg: 'Please enter a valid email' } });
     }
     // More expensive db checks/operations
-    try {
-      await prisma.account.findUnique({
-        where: { email: email },
-      });
-    } catch (err) {
-      console.log(err);
+    if (await prisma.account.findUnique({ where: { email: email }})) {
       return res.status(409).json({ error: { target: 'email', msg: 'This email is already in use' } });
-    }
-    try {
-      await prisma.account.findUnique({
-        where: { email: username },
-      });
-    } catch (err) {
-      console.log(err);
+    } 
+    if (await prisma.account.findUnique({ where: { username: username } })) {
       return res.status(409).json({ error: { target: 'username', msg: 'This username is already in use' } });
     }
-    //if all checks are passed
     next();
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    console.log('validation error: ', err);
     return res.status(500).json({ error: { target: 'all', msg: 'Something went wrong. Please try again later' } });
   }
 };
