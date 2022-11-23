@@ -48,7 +48,7 @@
       "src"
     ],
     "ext": "ts",
-    "exec": "ts-node --esm src/index.ts",
+    "exec": "ts-node src/index.ts",
     "events": {
       "restart": "npm run lint"
     }
