@@ -34,7 +34,7 @@ router.post('/signin', async (req: Request, res: Response) => {
             username: account.username,
             displayname: profile?.displayname,
           };
-          const accessToken = await new SignJWT({})
+          const accessToken = await new SignJWT(user)
             .setProtectedHeader({ alg: 'HS256' })
             .setJti(nanoid())
             .setExpirationTime(Date.now() + expires)

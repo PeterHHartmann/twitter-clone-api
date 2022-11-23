@@ -7,5 +7,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
+    "typeRoots": ["./types"]
   },
 }
