@@ -16,7 +16,7 @@ export const verifyAccess = async (req: Request, res: Response, next: NextFuncti
     const verified = await jwtVerify(token, new TextEncoder().encode(getAccessSecret()));
     console.log(verified);
     
-    req.user = verified.payload.username as string;
+    req.username = verified.payload.username as string;
     next();
   } catch (err) {
     return res.sendStatus(401);

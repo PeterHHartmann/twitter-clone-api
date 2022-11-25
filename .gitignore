@@ -6,3 +6,5 @@ node_modules
 
 # Compiled TypeScript directory
 dist
+
+yarn-error.log
