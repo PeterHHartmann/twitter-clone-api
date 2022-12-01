@@ -1,9 +1,11 @@
 import express from 'express';
 import AuthRouter from './auth';
-import AccountRouter from './account';
+import ProfileRouter from './profile';
+import ImageRouter from './image'
 
 const router = express.Router();
 router.use('/auth', AuthRouter);
-router.use('/', AccountRouter);
+router.use('/profile', ProfileRouter);
+router.use('/image', ImageRouter)
 
 export default router;
