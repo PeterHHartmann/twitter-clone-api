@@ -4,7 +4,7 @@ import { SignJWT } from 'jose';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
 import { validateSignup } from '../middleware/validateSignup';
-import { account, profile } from '@prisma/client';
+import { account, avatar, profile } from '@prisma/client';
 import { getAccessSecret } from '../utils/constants';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 const saltRounds = 10;
@@ -29,10 +29,14 @@ router.post('/signin', async (req: Request, res: Response) => {
           const profile: profile | null = await prisma.profile.findUnique({
             where: { username: account.username },
           });
+          const avatar: avatar | null = await prisma.avatar.findUnique({
+            where: { profile_id: profile?.id }
+          });
           const expires = 60 * 60 * 24 * 7;
           const user = {
             username: account.username,
             displayname: profile?.displayname,
+            avatar: avatar?.path
           };
           const accessToken = await new SignJWT(user)
             .setProtectedHeader({ alg: 'HS256' })

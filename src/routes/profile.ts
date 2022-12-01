@@ -1,12 +1,6 @@
 import prisma from '../config/prisma';
 import { Request, Response, Router } from 'express';
 import { verifyAccess } from '../middleware/verifyAccess';
-// import path from 'path';
-// import { extension } from 'mime-types';
-// import { nanoid } from 'nanoid';
-// import { readFile, mkdir, writeFile, rmdir } from 'fs/promises';
-// import rimraf from 'rimraf';
-// import PersistentFile from "formidable/PersistentFile";
 import { banner, avatar, profile } from "@prisma/client";
 import { ImageFile, parseForm } from "../utils/multipart";
 import { uploadImage } from "../utils/imageUpload";
