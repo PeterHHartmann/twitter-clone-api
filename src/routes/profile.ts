@@ -2,8 +2,6 @@ import prisma from '../config/prisma';
 import { Request, Response, Router } from 'express';
 import { verifyAccess } from '../middleware/verifyAccess';
 import { banner, avatar, profile } from "@prisma/client";
-import { ImageFile, parseForm } from "../utils/multipart";
-import { uploadImage } from "../utils/imageUpload";
 const router = Router();
 
 router.get('/:username', async (req, res) => {
@@ -27,30 +25,50 @@ router.get('/:username', async (req, res) => {
 
 router.put('/:username', verifyAccess, async (req: Request, res: Response) => {
   try {
+    console.log(req.body);
+    
     if (req.username !== req.params.username) return res.status(401).json({});
     const profile = await prisma.profile.findUnique({
       where: { username: req.username },
     });
     if (!profile) return res.status(404).json({});
-    const {fields, files} = await parseForm(req);    
     await prisma.profile.update({
       where: {
         username: req.username,
       },
       data: {
-        displayname: fields.displayname as string || profile.displayname,
-        bio: fields.bio as string || profile.bio,
-        location: fields.location as string || profile.location,
+        displayname: req.body.displayname as string || profile.displayname,
+        bio: req.body.bio as string || profile.bio,
+        location: req.body.location as string || profile.location,
       },
     });
-
-    const banner = files.banner as unknown as ImageFile;
-    if (banner) {
-      await uploadImage(banner, profile.id, 'banner')
+    if (req.body.banner) {
+      await prisma.banner.upsert({
+        where: {
+          profile_id: profile.id,
+        },
+        update: {
+          path: req.body.banner,
+        },
+        create: {
+          profile_id: profile.id,
+          path: req.body.banner,
+        },
+      });
     }
-    const avatar = files.avatar as unknown as ImageFile;
-    if (avatar) {
-      await uploadImage(avatar, profile.id, 'avatar')
+    if (req.body.avatar) {
+      await prisma.avatar.upsert({
+        where: {
+          profile_id: profile.id,
+        },
+        update: {
+          path: req.body.avatar,
+        },
+        create: {
+          profile_id: profile.id,
+          path: req.body.avatar,
+        },
+      });
     }
     return res.sendStatus(200);
   } catch (err) {
